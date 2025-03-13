@@ -47,7 +47,7 @@ jobs:
 
       - name: Create env.j2 template
         run: |
-          cat > llm/ansible_deploy/roles/streamlit/templates/env.j2 << 'EOL'
+          cat > ansible_deploy/roles/streamlit/templates/env.j2 << 'EOL'
           ANTHROPIC_API_KEY={{ anthropic_api_key }}
           # Database connection will be configured later
           PGHOST=localhost
@@ -59,7 +59,7 @@ jobs:
 
       - name: Create Ansible variables file with secrets
         run: |
-          cat > llm/ansible_deploy/roles/streamlit/vars/main.yml << EOL
+          cat > ansible_deploy/roles/streamlit/vars/main.yml << EOL
           ---
           app_user: ec2-user
           app_port: 8501
@@ -68,5 +68,5 @@ jobs:
 
       - name: Run Ansible playbook
         run: |
-          cd llm/ansible_deploy
+          cd ansible_deploy
           ansible-playbook -i inventory/hosts.ini deploy.yml
