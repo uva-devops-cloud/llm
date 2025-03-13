@@ -1,0 +1,8 @@
+---
+- name: Deploy Streamlit Application
+  hosts: webservers
+  become: true
+  vars_files:
+    - roles/streamlit/vars/main.yml
+  roles:
+    - streamlit

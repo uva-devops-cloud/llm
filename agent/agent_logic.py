@@ -35,7 +35,8 @@ def create_portal_agent():
         model="claude-3-haiku-20240307",
         temperature=0.7,
         max_tokens=1024,
-        system = system_message
+        system = system_message,
+        api_key=os.getenv('ANTHROPIC_API_KEY')  # Explicitly set the API key
     )
 
 

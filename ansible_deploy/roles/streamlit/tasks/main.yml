@@ -1,0 +1,114 @@
+---
+- name: Install required packages
+  dnf: # Using dnf for Amazon Linux 2023
+    name:
+      - python3
+      - python3-pip
+      - python3-devel
+      - git
+    state: present
+    update_cache: yes
+
+- name: Create app directory
+  file:
+    path: "/opt/streamlit-app"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+
+- name: Create Python virtual environment
+  shell: python3 -m venv /opt/streamlit-app/venv
+  args:
+    creates: /opt/streamlit-app/venv/bin/activate
+
+- name: Copy application files
+  copy:
+    src: "{{ playbook_dir }}/../../"
+    dest: "/opt/streamlit-app/"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0644"
+    exclude:
+      - "__pycache__"
+      - "database/"
+      - "ansible_deploy/"
+      - "*.git"
+
+- name: Create .env file
+  template:
+    src: env.j2
+    dest: /opt/streamlit-app/.env
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0600"
+
+- name: Upgrade pip in virtual environment
+  pip:
+    name: pip
+    state: latest
+    virtualenv: /opt/streamlit-app/venv
+
+- name: Install Python requirements
+  pip:
+    requirements: /opt/streamlit-app/requirements.txt
+    virtualenv: /opt/streamlit-app/venv
+  become_user: "{{ app_user }}"
+
+- name: Create streamlit_config.toml directory
+  file:
+    path: "/home/{{ app_user }}/.streamlit"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+
+- name: Create streamlit config file
+  copy:
+    content: |
+      [server]
+      headless = true
+      enableCORS = false
+      enableXsrfProtection = false
+    dest: "/home/{{ app_user }}/.streamlit/config.toml"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0644"
+
+- name: Create systemd service file
+  template:
+    src: streamlit.service.j2
+    dest: /etc/systemd/system/streamlit.service
+    mode: "0644"
+  notify: restart streamlit
+
+- name: Open port 8501 in firewalld
+  firewalld:
+    port: 8501/tcp
+    permanent: yes
+    state: enabled
+  ignore_errors: true # In case firewalld is not installed
+
+- name: Reload firewalld
+  command: firewall-cmd --reload
+  ignore_errors: true # In case firewalld is not installed
+
+- name: Enable and start streamlit service
+  systemd:
+    name: streamlit
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Set up application log rotation
+  copy:
+    content: |
+      /var/log/streamlit-app.log {
+        weekly
+        rotate 4
+        compress
+        missingok
+        notifempty
+      }
+    dest: /etc/logrotate.d/streamlit
+    mode: "0644"
