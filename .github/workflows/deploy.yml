@@ -35,6 +35,11 @@ jobs:
           chmod 644 ~/.ssh/id_rsa.pub
           ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Check directory structure
+        run: |
+          ls -la
+          find . -name hosts.ini
+
       - name: Update inventory file
         run: |
           sed -i "s/PLACEHOLDER_IP/${{ env.EC2_HOST }}/g" llm/ansible_deploy/inventory/hosts.ini
