@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      EC2_HOST: http://3.10.221.97:8501
+      EC2_HOST: 3.10.221.97
 
     steps:
       - name: Checkout code

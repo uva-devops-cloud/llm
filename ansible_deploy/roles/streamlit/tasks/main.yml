@@ -82,17 +82,6 @@
     mode: "0644"
   notify: restart streamlit
 
-- name: Open port 8501 in firewalld
-  firewalld:
-    port: 8501/tcp
-    permanent: yes
-    state: enabled
-  ignore_errors: true # In case firewalld is not installed
-
-- name: Reload firewalld
-  command: firewall-cmd --reload
-  ignore_errors: true # In case firewalld is not installed
-
 - name: Enable and start streamlit service
   systemd:
     name: streamlit
