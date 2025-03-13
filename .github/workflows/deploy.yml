@@ -1,0 +1,66 @@
+name: Deploy Streamlit App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      EC2_HOST: 3.10.221.97
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Ansible
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible
+
+      - name: Create SSH key files
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/id_rsa.pub
+          chmod 600 ~/.ssh/id_rsa
+          chmod 644 ~/.ssh/id_rsa.pub
+          ssh-keyscan -H ${{ env.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Update inventory file
+        run: |
+          sed -i "s/PLACEHOLDER_IP/${{ env.EC2_HOST }}/g" llm/ansible_deploy/inventory/hosts.ini
+
+      - name: Create env.j2 template
+        run: |
+          cat > llm/ansible_deploy/roles/streamlit/templates/env.j2 << 'EOL'
+          ANTHROPIC_API_KEY={{ anthropic_api_key }}
+          # Database connection will be configured later
+          PGHOST=localhost
+          PGPORT=5432
+          PGUSER=placeholder
+          PGPASSWORD=placeholder
+          PGDATABASE=placeholder
+          EOL
+
+      - name: Create Ansible variables file with secrets
+        run: |
+          cat > llm/ansible_deploy/roles/streamlit/vars/main.yml << EOL
+          ---
+          app_user: ec2-user
+          app_port: 8501
+          anthropic_api_key: "${{ secrets.ANTHROPIC_API_KEY }}"
+          EOL
+
+      - name: Run Ansible playbook
+        run: |
+          cd llm/ansible_deploy
+          ansible-playbook -i inventory/hosts.ini deploy.yml

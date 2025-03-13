@@ -1,0 +1,15 @@
+[Unit]
+Description=Streamlit Application Service
+After=network.target
+
+[Service]
+User={{ app_user }}
+WorkingDirectory=/opt/streamlit-app
+ExecStart=/opt/streamlit-app/venv/bin/streamlit run agent_app/streamlit_app.py --server.port={{ app_port }} --server.address=0.0.0.0
+Restart=on-failure
+Environment=PATH="/opt/streamlit-app/venv/bin:$PATH"
+Environment=PYTHONPATH="/opt/streamlit-app"
+Environment=ANTHROPIC_API_KEY={{ anthropic_api_key }}
+
+[Install]
+WantedBy=multi-user.target
