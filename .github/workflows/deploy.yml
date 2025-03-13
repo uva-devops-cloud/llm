@@ -43,7 +43,7 @@ jobs:
 
       - name: Update inventory file
         run: |
-          sed -i "s/PLACEHOLDER_IP/${{ env.EC2_HOST }}/g" llm/ansible_deploy/inventory/hosts.ini
+          sed -i "s/PLACEHOLDER_IP/${{ env.EC2_HOST }}/g" ansible_deploy/inventory/hosts.ini
 
       - name: Create env.j2 template
         run: |
