@@ -2,7 +2,8 @@ name: Deploy Streamlit App
 
 on:
   push:
-    branches: [main]
+    branches:
+      - "**"
   workflow_dispatch:
 
 jobs:
