@@ -1,0 +1,6 @@
+streamlit
+langchain
+langchain-anthropic
+pg8000
+python-dotenv
+langgraph
