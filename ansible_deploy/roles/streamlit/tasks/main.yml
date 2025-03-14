@@ -24,6 +24,14 @@
   args:
     creates: /opt/streamlit-app/venv/bin/activate
 
+- name: Create app directory
+  file:
+    path: "/opt/streamlit-app"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+
 - name: Copy application files
   copy:
     src: "{{ playbook_dir }}/../../"
@@ -31,11 +39,6 @@
     owner: "{{ app_user }}"
     group: "{{ app_user }}"
     mode: "0644"
-    exclude:
-      - "__pycache__"
-      - "database/"
-      - "ansible_deploy/"
-      - "*.git"
 
 - name: Create .env file
   template:
