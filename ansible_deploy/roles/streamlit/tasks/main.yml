@@ -67,9 +67,9 @@
     state: latest
     virtualenv: /opt/streamlit-app/venv
 
-- name: Install Python requirements
+- name: Install Python requirements from deployment-specific file
   pip:
-    requirements: /opt/streamlit-app/requirements.txt
+    requirements: /opt/streamlit-app/requirements-ansible.txt
     virtualenv: /opt/streamlit-app/venv
   become_user: "{{ app_user }}"
 
