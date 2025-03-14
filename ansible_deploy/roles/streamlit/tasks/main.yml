@@ -67,11 +67,27 @@
     state: latest
     virtualenv: /opt/streamlit-app/venv
 
-- name: Install Python requirements from deployment-specific file
+- name: Create requirements list
+  set_fact:
+    req_packages:
+      - streamlit
+      - python-dotenv
+      - pg8000
+      - langchain
+      - langchain-anthropic
+      - langgraph
+
+- name: Install Python packages individually with retry
   pip:
-    requirements: /opt/streamlit-app/requirements-ansible.txt
+    name: "{{ item }}"
     virtualenv: /opt/streamlit-app/venv
+    state: present
   become_user: "{{ app_user }}"
+  register: pip_result
+  retries: 3
+  delay: 5
+  until: pip_result is success
+  loop: "{{ req_packages }}"
 
 - name: Create streamlit_config.toml directory
   file:
