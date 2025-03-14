@@ -36,7 +36,7 @@
   git:
     repo: "https://github.com/uva-devops-cloud/llm.git"
     dest: "/opt/streamlit-app/"
-    version: main
+    version: feature/deploy-ansible
   become: true
   become_user: "{{ app_user }}"
 
