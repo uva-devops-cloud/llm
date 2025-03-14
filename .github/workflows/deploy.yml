@@ -66,6 +66,10 @@ jobs:
           anthropic_api_key: "${{ secrets.ANTHROPIC_API_KEY }}"
           EOL
 
+      - name: Debug SSH connection
+        run: |
+          ssh -v -i ~/.ssh/id_rsa ubuntu@${{ env.EC2_HOST }}
+
       - name: Run Ansible playbook
         run: |
           cd ansible_deploy
