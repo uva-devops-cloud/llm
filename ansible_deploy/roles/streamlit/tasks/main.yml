@@ -11,6 +11,13 @@
     update_cache: yes
   become: true
 
+- name: Remove existing app directory if it exists
+  file:
+    path: "/opt/streamlit-app"
+    state: absent
+  when: app_dir.stat.exists
+  become: true
+
 - name: Clone application from git
   git:
     repo: "https://github.com/uva-devops-cloud/llm.git"
