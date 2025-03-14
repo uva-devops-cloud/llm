@@ -67,27 +67,39 @@
     state: latest
     virtualenv: /opt/streamlit-app/venv
 
-- name: Create requirements list
-  set_fact:
-    req_packages:
-      - streamlit
-      - python-dotenv
-      - pg8000
-      - langchain
-      - langchain-anthropic
-      - langgraph
+- name: Check system resources
+  shell: |
+    echo "Memory:" && free -h
+    echo "Disk:" && df -h
+    echo "CPU:" && lscpu | grep "CPU(s):"
+    echo "Python version:" && python3 --version
+  register: system_resources
 
-- name: Install Python packages individually with retry
+- name: Display system resources
+  debug:
+    var: system_resources.stdout_lines
+
+- name: Try installing a single small package as a test
   pip:
-    name: "{{ item }}"
+    name: requests
     virtualenv: /opt/streamlit-app/venv
-    state: present
-  become_user: "{{ app_user }}"
-  register: pip_result
-  retries: 3
-  delay: 5
-  until: pip_result is success
-  loop: "{{ req_packages }}"
+  register: simple_install
+
+- name: Display simple package installation result
+  debug:
+    var: simple_install
+
+- name: Install Python packages with debug output
+  shell: |
+    /opt/streamlit-app/venv/bin/pip install --verbose streamlit
+  args:
+    executable: /bin/bash
+  register: pip_debug
+  ignore_errors: true
+
+- name: Display detailed pip debug output
+  debug:
+    var: pip_debug.stdout_lines
 
 - name: Create streamlit_config.toml directory
   file:
