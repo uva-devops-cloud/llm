@@ -11,34 +11,26 @@
     update_cache: yes
   become: true
 
-- name: Create app directory
+- name: Clone application from git
+  git:
+    repo: "https://github.com/uva-devops-cloud/llm.git"
+    dest: "/opt/streamlit-app/"
+    version: main
+  become: true
+  become_user: "{{ app_user }}"
+
+- name: Set ownership and permissions after cloning
   file:
     path: "/opt/streamlit-app"
-    state: directory
     owner: "{{ app_user }}"
     group: "{{ app_user }}"
     mode: "0755"
+    recurse: yes
 
 - name: Create Python virtual environment
   shell: python3 -m venv /opt/streamlit-app/venv
   args:
     creates: /opt/streamlit-app/venv/bin/activate
-
-- name: Create app directory
-  file:
-    path: "/opt/streamlit-app"
-    state: directory
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: "0755"
-
-- name: Copy application files
-  copy:
-    src: "{{ playbook_dir }}/../../"
-    dest: "/opt/streamlit-app/"
-    owner: "{{ app_user }}"
-    group: "{{ app_user }}"
-    mode: "0644"
 
 - name: Create .env file
   template:
