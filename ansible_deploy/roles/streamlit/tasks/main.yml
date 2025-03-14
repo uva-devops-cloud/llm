@@ -9,7 +9,7 @@
       - git
     state: present
     update_cache: yes
-    become: yes
+  become: true
 
 - name: Create app directory
   file:
