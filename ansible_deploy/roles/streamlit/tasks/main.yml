@@ -11,6 +11,11 @@
     update_cache: yes
   become: true
 
+- name: Check if app directory exists
+  stat:
+    path: "/opt/streamlit-app"
+  register: app_dir
+
 - name: Remove existing app directory if it exists
   file:
     path: "/opt/streamlit-app"
