@@ -23,6 +23,15 @@
   when: app_dir.stat.exists
   become: true
 
+- name: Create fresh app directory
+  file:
+    path: "/opt/streamlit-app"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: "0755"
+  become: true
+
 - name: Clone application from git
   git:
     repo: "https://github.com/uva-devops-cloud/llm.git"
